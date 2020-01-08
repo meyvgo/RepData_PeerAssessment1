@@ -13,7 +13,8 @@ All project code assumes these files are in the working directory.
 Below is the code to load the data and get the dates in a more usable format.  
 It also loads the libraries that will be used later.
 
-```{r load_data, results = "hide", message = FALSE}
+
+```r
 ## Load the libraries to be used
 library(dplyr)
 library(ggplot2)
@@ -30,7 +31,8 @@ initial_data$date <- as.Date(initial_data$date)
 ## What is mean total number of steps taken per day?
 To answer this question, we start by calculating the total number of steps taken per day. We're not worrying about missing values yet.
 
-```{r Calculate_Steps_Per_Day}
+
+```r
 ## Calculate the total number of step per day
 steps_per_day <- 
         initial_data %>%
@@ -40,7 +42,8 @@ steps_per_day <-
 
 Now we create a histogram of the total number of steps taken each day.
 
-```{r Histogram_steps_per_day}
+
+```r
 ## Use ggplot2 to create the histogram
 ## Seven bars seems appropriate for the number of data points
 h <- ggplot(steps_per_day, aes(x = daysteps)) +
@@ -51,20 +54,35 @@ h <- ggplot(steps_per_day, aes(x = daysteps)) +
 print(h)
 ```
 
+![](PA1_template_files/figure-html/Histogram_steps_per_day-1.png)<!-- -->
+
 Finally, we calculate the mean (and median) total number of steps taken per day to answer the original question. We're ignoring NA values for now.
 
-```{r mean_and_median_steps_per_day}
+
+```r
 ## Calculate the mean
 mean(steps_per_day$daysteps, na.rm = TRUE)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 ## Calculate the median  
 median(steps_per_day$daysteps, na.rm = TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 
 ## What is the average daily activity pattern?
 To answer this question, we'll start by calculating the average number of steps across all days for each 5-minute interval.
 
-```{r avg_steps_per_interval}
+
+```r
 avg_per_interval <- 
         initial_data %>%
         group_by(interval) %>%
@@ -73,7 +91,8 @@ avg_per_interval <-
 
 Then we will create a time series plot of the average number of steps across all days for each 5-minute interval in a day.
 
-```{r Time_series_steps_per_interval}
+
+```r
 ## Use ggplot2 to create the plot
 t <- ggplot(avg_per_interval, aes(x = interval, y = avgsteps)) +
         geom_line(na.rm = TRUE) +
@@ -83,18 +102,30 @@ t <- ggplot(avg_per_interval, aes(x = interval, y = avgsteps)) +
 print(t)
 ```
 
+![](PA1_template_files/figure-html/Time_series_steps_per_interval-1.png)<!-- -->
+
 Finally, we want to find the interval that has the greatest average number of steps across all days.
 
-```{r find_max_interval}
+
+```r
 avg_per_interval$interval[which.max(avg_per_interval$avgsteps)]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 
 Here we calculate the total number of missing values in the dataset.
 
-```{r find_num_missing}
+
+```r
 sum(!complete.cases(initial_data))
+```
+
+```
+## [1] 2304
 ```
 
 The strategy for filling in missing values in the dataset will be to use the mean for the corresponding 5-minute interval for these reasons:  
@@ -104,7 +135,8 @@ The strategy for filling in missing values in the dataset will be to use the mea
 
 Here is the code to create a new dataset with each missing value filled in with its corresponding 5-minute interval mean.
 
-```{r fill_in_data}
+
+```r
 ## Start with the original data
 filled_data <- initial_data
 
@@ -123,7 +155,8 @@ Now we will create a new histogram of the total number of steps taken per day.
 
 The next code chunk calculates the total number of step per day using the new dataset.
 
-```{r calc_new_steps_per_day}
+
+```r
 new_steps_per_day <- 
         filled_data %>%
         group_by(date) %>%
@@ -132,7 +165,8 @@ new_steps_per_day <-
 
 Then we can create the histogram.
 
-```{r Histogram_steps_per_day_imputed}
+
+```r
 ## Use ggplot2
 ## Seven bars seems appropriate for the number of data points
 new_h <- ggplot(new_steps_per_day, aes(x = daysteps)) +
@@ -143,13 +177,27 @@ new_h <- ggplot(new_steps_per_day, aes(x = daysteps)) +
 print(new_h)
 ```
 
+![](PA1_template_files/figure-html/Histogram_steps_per_day_imputed-1.png)<!-- -->
+
 Finally, we calculate the mean and median of the total number of steps taken per day using the new dataset.
 
-```{r new_mean_and_median_steps_per_day}
+
+```r
 ## Calculate the mean
 mean(new_steps_per_day$daysteps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 ## Calculate the median
 median(new_steps_per_day$daysteps)
+```
+
+```
+## [1] 10766.19
 ```
 
 We can see that adding the missing values did not change the mean from when we calculated it without those values. This makes sense since the values added were all mean values. We can also see that the median, which was already close to the mean, increased slightly to become equal to the mean.
@@ -161,7 +209,8 @@ So one impact of imputing missing data in the manner we used (interval mean) was
 To answer this question, we will use the new dataset with the filled-in missing values.  
 We'll start by creating a new factor variable indicating whether a given date is a weekday or a weekend.
 
-```{r add_daytype}
+
+```r
 weekend_days <- c("Saturday", "Sunday")
 for(i in 1:nrow(filled_data)) {
         if(weekdays(filled_data$date[i]) %in% weekend_days) {
@@ -176,7 +225,8 @@ Now we'll create a panel plot showing a time series plot of average number of st
 
 To do this, we'll start by calculating the average number of steps for each 5-minute interval for weekday days and for weekend days using the new dataset.
 
-```{r avg_per_interval_by_daytype}
+
+```r
 new_avg_per_interval <- 
         filled_data %>%
         group_by(daytype, interval) %>%
@@ -185,7 +235,8 @@ new_avg_per_interval <-
 
 Now we can draw the panel plot.
 
-```{r Time_series_steps_per_interval_by_daytype}
+
+```r
 ## We'll use ggplot2
 new_t <- ggplot(new_avg_per_interval, aes(x = interval, y = avgsteps)) +
         facet_grid(daytype ~ .) +
@@ -195,6 +246,8 @@ new_t <- ggplot(new_avg_per_interval, aes(x = interval, y = avgsteps)) +
 
 print(new_t)
 ```
+
+![](PA1_template_files/figure-html/Time_series_steps_per_interval_by_daytype-1.png)<!-- -->
 
 From the plot we can see several differences in activity patterns between weekdays and weekends:  
 1. There is less activity early in the day on weekends.  
